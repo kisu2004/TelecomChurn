@@ -1,3 +1,88 @@
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+
+sns.set(style="whitegrid")
+
+# 1️⃣ Load Dataset
+df = pd.read_csv(r"C:\Users\Lenovo\Downloads\TelecomChurn.csv")
+print("Dataset shape:", df.shape)
+print(df.head())
+
+# 2️⃣ EDA – Churn Distribution
+plt.figure(figsize=(6, 4))
+sns.countplot(x="Churn", data=df, palette="Set2")
+plt.title("Customer Churn Distribution")
+plt.tight_layout()
+plt.show()
+
+# 3️⃣ Correlation Heatmap
+plt.figure(figsize=(10, 7))
+sns.heatmap(df.corr(), annot=False, cmap="coolwarm")
+plt.title("Feature Correlation Heatmap")
+plt.tight_layout()
+plt.show()
+
+# 4️⃣ Feature Selection
+X = df.drop("Churn", axis=1)
+y = df["Churn"]
+
+# 5️⃣ Train–Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# 6️⃣ Scaling
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# 7️⃣ Models
+model_names = ["Logistic Regression", "Decision Tree", "Random Forest", "KNN", "SVC"]
+models = [
+    LogisticRegression(max_iter=1000),
+    DecisionTreeClassifier(),
+    RandomForestClassifier(n_estimators=120, random_state=42),
+    KNeighborsClassifier(n_neighbors=7),
+    SVC(kernel="rbf")
+]
+
+accuracies = []
+precisions = []
+recalls = []
+f1s = []
+
+# 8️⃣ Train & Evaluate
+for name, model in zip(model_names, models):
+    model.fit(X_train, y_train)
+    pred = model.predict(X_test)
+
+    acc = accuracy_score(y_test, pred)
+    prec = precision_score(y_test, pred)
+    rec = recall_score(y_test, pred)
+    f1 = f1_score(y_test, pred)
+
+    accuracies.append(acc)
+    precisions.append(prec)
+    recalls.append(rec)
+    f1s.append(f1)
+
+    print(f"\n{name}")
+    print("Accuracy :", acc)
+    print("Precision:", prec)
+    print("Recall   :", rec)
     print("F1 Score :", f1)
 
 # 9️⃣ Accuracy Comparison Plot
@@ -17,3 +102,4 @@ plt.ylim(0, 1)
 plt.xticks(rotation=20)
 plt.tight_layout()
 plt.show()
+
